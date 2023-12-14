@@ -1,8 +1,9 @@
 package com.example.homework_17.register
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.homework_17.helper.JsonConverter
+import com.example.homework_17.common.ErrorHandling
 import com.example.homework_17.common.Resource
 import com.example.homework_17.dto.AuthDto
 import com.example.homework_17.model.User
@@ -25,11 +26,12 @@ class RegisterViewModel: ViewModel() {
                 if(response.isSuccessful){
                     _userFlow.value = Resource.Success(response.body()!!)
                 }else{
-                    _userFlow.value = Resource.Error(response.errorBody()?.string())
+                    val error = JsonConverter.readErrorMessage(response.errorBody()?.string() ?: "")
+                    _userFlow.value = Resource.Error(error)
                 }
 
             }catch (e: Throwable){
-                Log.i("exception", e.message!!)
+                _userFlow.value = Resource.Error(ErrorHandling.NO_INTERNET_CONNECTION.message)
             }finally {
                 _userFlow.value = Resource.Idle
             }

@@ -63,7 +63,9 @@ class RegisterFragment : BaseFragment<FragmentRegisterBinding>(FragmentRegisterB
                             setFragmentResult("authData", bundle)
                             findNavController().popBackStack()
                         }
-                        is Resource.Error -> { }
+                        is Resource.Error -> {
+                            binding.tvError.text = it.error
+                        }
                         is Resource.Loading -> showLoader()
                         is Resource.Idle -> hideLoader()
                     }

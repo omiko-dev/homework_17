@@ -9,3 +9,7 @@ sealed class Resource<out R> {
 }
 
 data class ErrorResponse(val error: String?)
+
+enum class ErrorHandling(val message: String){
+    NO_INTERNET_CONNECTION("no internet connection!")
+}

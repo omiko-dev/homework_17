@@ -1,38 +1,28 @@
 package com.example.homework_17.login
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.homework_17.common.ErrorResponse
+import com.example.homework_17.helper.JsonConverter
+import com.example.homework_17.common.ErrorHandling
 import com.example.homework_17.common.Resource
+import com.example.homework_17.datastore.SessionUserData
 import com.example.homework_17.datastore.UserDataSerializer
 import com.example.homework_17.dto.AuthDto
 import com.example.homework_17.model.User
 import com.example.homework_17.network.Network
-import com.example.homework_17.datastore.SessionUserData
-import com.squareup.moshi.JsonDataException
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import java.net.SocketTimeoutException
+import java.net.UnknownHostException
 
 class LoginViewModel : ViewModel() {
 
     private val _userFlow = MutableStateFlow<Resource<User>>(Resource.Idle)
     val userFlow: SharedFlow<Resource<User>> = _userFlow.asStateFlow()
 
-    private val moshi by lazy {
-        Moshi.Builder()
-            .addLast(KotlinJsonAdapterFactory())
-            .build()
-    }
-    private val adapter by lazy {
-        moshi.adapter(ErrorResponse::class.java)
-    }
+
 
     fun login(authDto: AuthDto) {
         viewModelScope.launch {
@@ -42,12 +32,12 @@ class LoginViewModel : ViewModel() {
                 if (response.isSuccessful) {
                     _userFlow.value = Resource.Success(response.body()!!)
                 } else {
-                    val error = readErrorMessage(response.errorBody()?.string() ?: "")
+                    val error = JsonConverter.readErrorMessage(response.errorBody()?.string() ?: "")
                     _userFlow.value = Resource.Error(error)
                 }
 
-            } catch (e: SocketTimeoutException) {
-                Log.i("exception", "${e.message}")
+            } catch (e: UnknownHostException) {
+                _userFlow.value = Resource.Error(ErrorHandling.NO_INTERNET_CONNECTION.message)
             } finally {
                 _userFlow.value = Resource.Idle
             }
@@ -60,12 +50,5 @@ class LoginViewModel : ViewModel() {
         }
     }
 
-    private fun readErrorMessage(errorBody: String): String? {
-        return try {
-            val errorResponse = adapter.fromJson(errorBody)
-            errorResponse?.error
-        } catch (e: JsonDataException) {
-            null
-        }
-    }
+
 }
