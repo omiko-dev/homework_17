@@ -1,7 +1,10 @@
+import com.google.protobuf.gradle.id
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
     id("androidx.navigation.safeargs.kotlin")
+    id("com.google.protobuf") version "0.9.1"
 }
 
 android {
@@ -56,5 +59,24 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-moshi:2.9.0")
     implementation("com.squareup.moshi:moshi-kotlin:1.14.0")
 
-    implementation("androidx.datastore:datastore-preferences:1.0.0")
+    implementation("androidx.datastore:datastore:1.0.0")
+    implementation("com.google.protobuf:protobuf-javalite:3.18.0")
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:4.0.0-rc-2"
+    }
+    plugins {
+        id("javalite") { artifact = "com.google.protobuf:protoc-gen-javalite:3.0.0" }
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                id("java") {
+                    option("lite")
+                }
+            }
+        }
+    }
 }

@@ -14,8 +14,7 @@ import com.example.homework_17.databinding.FragmentLoginBinding
 import com.example.homework_17.dto.AuthDto
 import com.example.homework_17.model.ErrorMessage
 import com.example.homework_17.model.User
-import com.example.homework_17.session.SessionData
-import com.example.homework_17.session.SessionManager
+import com.example.homework_17.datastore.SessionUserData
 import kotlinx.coroutines.launch
 
 
@@ -38,16 +37,6 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::i
             }
         }
     }
-
-    private fun checkSession() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            if(SessionManager.getSessionData().isLoggedIn){
-                val action = LoginFragmentDirections.actionLoginFragmentToHomeFragment()
-                findNavController().navigate(action)
-            }
-        }
-    }
-
 
     private fun loginClick() {
         binding.btnLogin.setOnClickListener {
@@ -111,12 +100,12 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::i
 
     private fun saveInSession() {
         with(binding) {
-            val sessionData = if (cbRemember.isChecked) {
-                SessionData(true, authDto.email)
+            val sessionUserData = if (cbRemember.isChecked) {
+                SessionUserData(true, authDto.email)
             } else {
-                SessionData(false, authDto.email)
+                SessionUserData(false, authDto.email)
             }
-            viewModel.saveSessionData(sessionData)
+            viewModel.saveUserData(sessionUserData)
         }
     }
 
@@ -135,7 +124,6 @@ class LoginFragment : BaseFragment<FragmentLoginBinding>(FragmentLoginBinding::i
     }
 
     override fun observer() {
-        checkSession()
         userObservable()
     }
 

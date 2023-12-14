@@ -5,14 +5,15 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.homework_17.common.ErrorResponse
 import com.example.homework_17.common.Resource
+import com.example.homework_17.datastore.UserDataSerializer
 import com.example.homework_17.dto.AuthDto
 import com.example.homework_17.model.User
 import com.example.homework_17.network.Network
-import com.example.homework_17.session.SessionData
-import com.example.homework_17.session.SessionManager
+import com.example.homework_17.datastore.SessionUserData
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -47,14 +48,15 @@ class LoginViewModel : ViewModel() {
 
             } catch (e: SocketTimeoutException) {
                 Log.i("exception", "${e.message}")
+            } finally {
+                _userFlow.value = Resource.Idle
             }
-            _userFlow.value = Resource.Idle
         }
     }
 
-    fun saveSessionData(sessionData: SessionData) {
-        viewModelScope.launch {
-            SessionManager.saveSessionData(sessionData)
+    fun saveUserData(sessionUserData: SessionUserData) {
+        viewModelScope.launch(Dispatchers.IO) {
+            UserDataSerializer.setUserData(sessionUserData)
         }
     }
 
@@ -62,8 +64,7 @@ class LoginViewModel : ViewModel() {
         return try {
             val errorResponse = adapter.fromJson(errorBody)
             errorResponse?.error
-        }catch (e: JsonDataException){
-            Log.e("JsonDataException", "JSON parsing error")
+        } catch (e: JsonDataException) {
             null
         }
     }
