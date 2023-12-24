@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:gravity="center_horizontal"
     android:layout_marginHorizontal="20dp"
-    tools:context=".login.LoginFragment">
+    tools:context=".presentation.login.LoginFragment">
 
     <androidx.appcompat.widget.AppCompatTextView
         android:layout_width="wrap_content"
